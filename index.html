@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1230">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="KIKO — 14 jeux éducatifs pour lire, écrire, compter et réfléchir">
+<title>KIKO — Apprendre en jouant</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<style>
+:root{--gold:#ffd84d;--cyan:#5ce9ed;--pink:#ff72ad;--green:#75e7a7;--red:#ff5c7a;--ink:#0a1230}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#fff;background:#060c22}
+button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;color:inherit}
+#app{max-width:560px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% -10%,#5264b3 0,#1c275b 44%,#0a102b 100%);overflow:hidden;position:relative}
+.view{display:none;flex:1;overflow-y:auto;padding:16px 16px 24px;-webkit-overflow-scrolling:touch}
+.view.on{display:block;animation:in .28s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.brand{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand .logo{font-size:22px;font-weight:1000;letter-spacing:1px}
+.brand .logo b{color:var(--gold)}
+.brand .chips{display:flex;gap:5px}
+.chip{background:#ffffff19;border:1px solid #ffffff25;padding:6px 10px;border-radius:30px;font-size:12px;font-weight:900;display:flex;align-items:center;gap:4px}
+.chip.streak{color:#ff8c42}
+.chip.coins{color:var(--gold)}
+
+.hero{background:linear-gradient(145deg,#3858a9,#252f6d 62%,#663b88);border:1px solid #ffffff30;border-radius:22px;padding:14px;position:relative;overflow:hidden;box-shadow:0 14px 30px #0005;margin-bottom:14px}
+.hero-row{display:flex;align-items:center;gap:8px}
+.hero h1{font-size:22px;line-height:1.05;margin:4px 0}
+.hero p{font-size:12px;color:#e0e7ff;margin:0;line-height:1.4;max-width:220px}
+.kikoBox{width:110px;height:120px;flex-shrink:0;display:grid;place-items:center;position:relative}
+.kikoSvg{width:100px;height:110px;filter:drop-shadow(0 8px 6px #0005);animation:idle 2.3s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes idle{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+.kiko-accessory{position:absolute;font-size:26px;pointer-events:none;z-index:2;left:50%;transform:translateX(-50%)}
+
+.tabs{display:flex;gap:6px;margin-bottom:12px;background:#ffffff10;padding:5px;border-radius:16px}
+.tab{flex:1;padding:10px 8px;border-radius:12px;background:transparent;color:#b9c6ef;font-weight:900;font-size:12px;transition:.2s}
+.tab.active{background:linear-gradient(145deg,#ffdf5a,#ffb83e);color:#33264a;box-shadow:0 3px 10px #0004}
+
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}
+.game-card{padding:14px 12px;border-radius:16px;color:#fff;text-align:center;position:relative;
+  border:1px solid #ffffff28;transition:.15s;box-shadow:0 6px 14px #0003;
+  display:flex;flex-direction:column;align-items:center;min-height:105px;justify-content:center}
+.game-card:active{transform:scale(.96)}
+.game-card .gc-emoji{font-size:32px;line-height:1;margin-bottom:4px}
+.game-card .gc-name{font-size:13px;font-weight:900;line-height:1.15}
+.game-card .gc-sub{font-size:10px;color:#e0e6ff;margin-top:3px;line-height:1.3}
+.game-card .gc-badge{position:absolute;top:6px;right:8px;font-size:9px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:8px;font-weight:800}
+
+.qTop{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff14;margin-bottom:14px}
+.qTop .back{padding:8px 12px;background:#ffffff19;border:1px solid #ffffff25;border-radius:12px;font-weight:800;font-size:13px}
+.qTop .title{flex:1;text-align:center;font-weight:900;font-size:13px}
+.qTop .status{font-size:13px;color:var(--gold);font-weight:900;white-space:nowrap}
+
+.qCard{padding:20px;border-radius:22px;background:linear-gradient(145deg,#2b3979,#17224d);border:1px solid #ffffff25;box-shadow:0 13px 28px #0005;margin-bottom:14px}
+.qMeta{display:flex;justify-content:space-between;font-size:11px;color:#b9c6ef;font-weight:800;margin-bottom:12px}
+.qVisual{text-align:center;font-size:52px;line-height:1.3;margin:8px 0 16px;min-height:60px;letter-spacing:2px}
+.qVisual.small{font-size:36px}
+.qQuestion{text-align:center;font-size:22px;font-weight:1000;line-height:1.25;margin:8px 0 18px;white-space:pre-line}
+.qQuestion.small{font-size:19px}
+
+.qOptions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.qOptions.three{grid-template-columns:1fr 1fr 1fr}
+.qOptions.one{grid-template-columns:1fr}
+.qOpt{padding:18px 10px;border-radius:14px;background:#ffffff15;color:#fff;border:2px solid #ffffff25;font-size:20px;font-weight:950;transition:.15s;min-height:60px}
+.qOpt.small{font-size:16px}
+.qOpt:active{transform:scale(.96)}
+.qOpt.good{background:#187b59;border-color:#7df0b0}
+.qOpt.bad{background:#96385f;border-color:#ff8db9}
+.qOpt:disabled{opacity:.75}
+
+.qFeedback{text-align:center;margin-top:14px;font-size:14px;font-weight:900;min-height:22px}
+.qFeedback.good{color:var(--green)}
+.qFeedback.bad{color:var(--red)}
+
+.qNext{width:100%;margin-top:12px;padding:16px;border-radius:16px;background:linear-gradient(90deg,#ffdf5a,#ffb83e);color:#33264a;font-weight:1000;font-size:16px;box-shadow:0 5px 0 #ad6b2d;display:none}
+.qNext.on{display:block}
+.qNext:active{transform:translateY(3px);box-shadow:0 2px 0 #ad6b2d}
+
+.memGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.memTile{aspect-ratio:1;border-radius:13px;background:linear-gradient(145deg,#5267b9,#29356d);border:1px solid #ffffff35;color:#fff;font-size:30px;font-weight:900;transition:.2s}
+.memTile.open{background:#fff;color:#202955}
+.memTile.match{background:linear-gradient(145deg,#18805c,#0d5f42);color:#fff}
+
+.orderItems{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+.orderItem{padding:14px;border-radius:14px;background:#ffffff15;border:2px solid #ffffff25;color:#fff;font-size:18px;font-weight:900;display:flex;align-items:center;gap:12px;text-align:left;width:100%}
+.orderItem.selected{background:#fef3c7;color:#0a1230;border-color:var(--gold)}
+.orderItem .num{width:32px;height:32px;border-radius:50%;background:#00000030;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.orderItem.selected .num{background:var(--gold);color:#0a1230}
+
+.shop-card{padding:16px;border-radius:18px;background:linear-gradient(145deg,#2b3979,#17224d);border:1px solid #ffffff25;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.shop-card .item-icon{font-size:40px;flex-shrink:0}
+.shop-card .item-info{flex:1;min-width:0}
+.shop-card .item-name{font-weight:900;font-size:15px}
+.shop-card .item-desc{font-size:11px;color:#b9c6ef;margin-top:2px}
+.shop-card .item-btn{padding:10px 16px;border-radius:12px;font-weight:900;font-size:13px;background:linear-gradient(145deg,#ffdf5a,#ffb83e);color:#33264a;flex-shrink:0}
+.shop-card .item-btn.owned{background:#ffffff19;color:#fff;border:1px solid #ffffff30}
+.shop-card .item-btn.equipped{background:var(--green);color:#0a1230}
+.shop-card .item-btn:disabled{opacity:.5}
+
+.result{text-align:center;padding:20px 16px}
+.result .bigEmoji{font-size:70px;animation:idle 1.8s infinite;line-height:1}
+.result h2{font-size:24px;margin:8px 0}
+.result p{color:#dbe3ff;font-size:14px;line-height:1.5;margin:6px 0}
+.result .stats{display:flex;justify-content:center;gap:14px;margin:18px 0;padding:14px;background:#ffffff12;border-radius:16px}
+.result .stats .s{text-align:center;flex:1}
+.result .stats .s .n{font-size:20px;font-weight:1000;color:var(--gold)}
+.result .stats .s .l{font-size:10px;color:#b9c6ef;margin-top:2px}
+.result .btn{width:100%;padding:14px;border-radius:16px;background:linear-gradient(90deg,#ffdf5a,#ffb83e);color:#33264a;font-weight:1000;font-size:15px;margin-top:8px;box-shadow:0 5px 0 #ad6b2d}
+.result .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #ad6b2d}
+.result .btn.secondary{background:#ffffff14;color:#fff;box-shadow:none;border:1px solid #ffffff25}
+
+#consigneBox{background:linear-gradient(145deg,#2b3979,#17224d);border:1px solid #ffffff25;border-radius:14px;padding:10px;margin-bottom:8px;text-align:center;font-size:15px;font-weight:900}
+#consigneWord{letter-spacing:8px;font-size:20px;margin-top:4px}
+#consigneWord .done{color:var(--green)}
+#consigneWord .asked{color:var(--cyan)}
+
+#gameWrap{position:relative;background:#0a1230;border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14;overflow:hidden;touch-action:none;border-radius:12px}
+#gameCanvas{display:block;width:100%}
+
+.rails{display:flex;gap:10px;margin-top:10px}
+.rails button{flex:1;padding:16px;border-radius:14px;font-size:15px;font-weight:1000;background:linear-gradient(145deg,#4a62b8,#29356d);color:#fff;border:2px solid #ffffff30;box-shadow:0 3px 0 #1a2450}
+.rails button:active{transform:translateY(2px);box-shadow:0 1px 0 #1a2450}
+
+#writeWrap{background:#fff;border-radius:20px;padding:8px}
+#writeCanvas{display:block;width:100%;border-radius:14px;touch-action:none;background:#fff}
+
+.writeHint{text-align:center;color:#d7e0ff;font-size:12px;margin:10px 0}
+.writeActions{display:flex;gap:10px}
+.writeActions button{flex:1;padding:14px;border-radius:14px;font-weight:1000;font-size:14px}
+.writeActions .ghost{background:#ffffff14;color:#fff;border:1px solid #ffffff25}
+.writeActions .primary{background:linear-gradient(145deg,#ffdf5a,#ffb83e);color:#33264a;box-shadow:0 4px 0 #ad6b2d}
+.writeActions .primary:active{transform:translateY(2px);box-shadow:0 2px 0 #ad6b2d}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;background:#fff;color:#182047;padding:10px 16px;border-radius:30px;font-size:13px;font-weight:900;z-index:100;transition:.25s;white-space:nowrap;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.conf{position:fixed;top:-15px;width:9px;height:14px;animation:fall 1.8s linear forwards;pointer-events:none;z-index:99}
+@keyframes fall{to{transform:translateY(110vh) rotate(650deg);opacity:0}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<section id="home" class="view on">
+  <div class="brand">
+    <div class="logo">KIKO<b>★</b></div>
+    <div class="chips">
+      <span class="chip streak" id="streakChip">🔥 0</span>
+      <span class="chip coins" id="coinsChip">🪙 0</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-row">
+      <div style="flex:1">
+        <div style="font-size:9px;color:var(--cyan);font-weight:1000;letter-spacing:2px">JOUER · APPRENDRE · GAGNER</div>
+        <h1 id="heroGreet">Salut !</h1>
+        <p id="heroSub">Choisis ton jeu du jour</p>
+      </div>
+      <div class="kikoBox">
+        <svg class="kikoSvg" viewBox="0 0 140 150">
+          <ellipse cx="72" cy="140" rx="39" ry="7" fill="#111936" opacity=".3"/>
+          <path d="M49 104 L47 132 Q47 139 57 139 L65 139 L68 111 M80 109 L84 133 Q85 140 95 139 L102 137 L96 105" fill="#174f9c" stroke="#102c62" stroke-width="3"/>
+          <path d="M44 73 Q34 77 34 98 L39 115 Q68 127 103 113 L105 89 Q102 75 91 72Z" fill="#ffd12f" stroke="#d99b1c" stroke-width="3"/>
+          <path d="M42 79 Q29 83 26 101 L19 111 Q15 117 21 121 Q28 123 33 112 L49 97" fill="#8b4b2e" stroke="#6b3425" stroke-width="3"/>
+          <path d="M96 80 Q109 83 111 99 L119 107 Q125 112 120 118 Q114 122 108 113 L92 98" fill="#8b4b2e" stroke="#6b3425" stroke-width="3"/>
+          <path d="M43 38 Q42 13 69 12 Q99 13 101 42 L97 70 Q89 91 70 91 Q49 89 43 68Z" fill="#8b4b2e" stroke="#572b22" stroke-width="3"/>
+          <path d="M42 39 Q38 18 57 12 Q62 2 75 10 Q90 4 98 22 Q108 31 99 45 L91 32 Q76 39 59 31 L48 46Z" fill="#171321"/>
+          <g fill="#171321"><circle cx="47" cy="19" r="7"/><circle cx="58" cy="11" r="8"/><circle cx="72" cy="9" r="8"/><circle cx="86" cy="12" r="8"/><circle cx="98" cy="23" r="8"/></g>
+          <ellipse cx="59" cy="52" rx="5" ry="7" fill="#fff"/><ellipse cx="84" cy="52" rx="5" ry="7" fill="#fff"/>
+          <circle cx="60" cy="53" r="3" fill="#171321"/><circle cx="85" cy="53" r="3" fill="#171321"/>
+          <path d="M65 70 Q72 77 80 69" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span class="kiko-accessory" id="kikoAcc" style="display:none;top:12px"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="lire">📖 Lire & Écrire</button>
+    <button class="tab" data-tab="maths">🔢 Maths</button>
+    <button class="tab" data-tab="logique">🧩 Logique</button>
+  </div>
+
+  <div id="gamesContainer"></div>
+
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <button style="flex:1;padding:14px;border-radius:14px;background:linear-gradient(145deg,#a855f7,#6b21a8);color:#fff;font-weight:900;font-size:13px;box-shadow:0 4px 12px #a855f744" data-action="surprise">🎲 Surprise-moi</button>
+    <button style="flex:1;padding:14px;border-radius:14px;background:#ffffff14;border:1px solid #ffffff25;color:#fff;font-weight:900;font-size:13px" data-action="shop">🎩 Boutique</button>
+  </div>
+
+  <div style="text-align:center;color:#8997c9;font-size:10px;margin-top:16px">KIKO v2 • 14 jeux • Hors ligne • v2.0.0</div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title" id="quizTitle">Quiz</div>
+    <div class="status" id="quizScore">⭐ 0</div>
+  </div>
+  <div class="qCard">
+    <div class="qMeta">
+      <span id="quizCount">Question 1/5</span>
+      <span id="quizStreakInline">🔥 0</span>
+    </div>
+    <div class="qVisual" id="quizVisual"></div>
+    <div class="qQuestion" id="quizQuestion"></div>
+    <div class="qOptions" id="quizOptions"></div>
+    <div class="qFeedback" id="quizFeedback"></div>
+    <button class="qNext" id="quizNext">Continuer ➜</button>
+  </div>
+</section>
+
+<!-- MEMORY -->
+<section id="memory" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title">🃏 Memory</div>
+    <div class="status" id="memPairs">0/6</div>
+  </div>
+  <div class="qCard">
+    <div class="qQuestion small">Retrouve les 6 paires d'animaux !</div>
+    <div class="memGrid" id="memGrid"></div>
+    <div class="qFeedback" id="memFeedback"></div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section id="order" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title">📋 Ranger</div>
+    <div class="status" id="orderScore">0</div>
+  </div>
+  <div class="qCard">
+    <div class="qQuestion small" id="orderHint">Touche du plus petit au plus grand</div>
+    <div class="orderItems" id="orderItems"></div>
+    <button class="qNext" id="orderValidate">Valider ✅</button>
+  </div>
+</section>
+
+<!-- COURSE -->
+<section id="game" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title" id="gameTitle">🎯 Course</div>
+    <div class="status"><span id="gameLives">❤️❤️❤️</span> <span id="gameScore">⭐ 0</span></div>
+  </div>
+  <div id="consigneBox">
+    <div id="consigneText">Attrape les voyelles</div>
+    <div id="consigneWord"></div>
+  </div>
+  <div id="gameWrap"><canvas id="gameCanvas"></canvas></div>
+  <div class="rails">
+    <button data-rail="0">⬆️ HAUT</button>
+    <button data-rail="1">⬇️ BAS</button>
+  </div>
+</section>
+
+<!-- WRITE -->
+<section id="write" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title" id="writeTitle">✍️ Écris : A</div>
+    <div class="status"></div>
+  </div>
+  <div id="writeWrap"><canvas id="writeCanvas"></canvas></div>
+  <div class="writeHint">Trace la lettre avec ton doigt, en suivant le modèle gris.</div>
+  <div class="writeActions">
+    <button class="ghost" data-clear>🧽 Effacer</button>
+    <button class="primary" data-validate>✅ Valider</button>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title">🎩 Boutique</div>
+    <div class="status">🪙 <span id="shopCoins">0</span></div>
+  </div>
+  <div id="shopItems"></div>
+</section>
+
+<!-- RESULT -->
+<section id="result" class="view">
+  <div class="qTop">
+    <button class="back" data-back>←</button>
+    <div class="title">🏆 Résultat</div>
+    <div class="status"></div>
+  </div>
+  <div class="result">
+    <div class="bigEmoji" id="resultEmoji">🏆</div>
+    <h2 id="resultTitle">Bravo !</h2>
+    <p id="resultText"></p>
+    <div class="stats">
+      <div class="s"><div class="n" id="resPoints">0</div><div class="l">points</div></div>
+      <div class="s"><div class="n" id="resGood">0</div><div class="l">réussis</div></div>
+      <div class="s"><div class="n" id="resCoins">0</div><div class="l">pièces</div></div>
+    </div>
+    <button class="btn" id="replayBtn">🔁 Rejouer</button>
+    <button class="btn secondary" data-back>🏠 Accueil</button>
+  </div>
+</section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+'use strict';
+
+// ============ UTILS ============
+const $ = id => document.getElementById(id);
+const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=[...a]; for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]} return r; };
+const dayKey = () => new Date().toISOString().slice(0,10);
+
+// ============ AUDIO ============
+let audioCtx = null;
+function getAudio(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){return null} }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq=600, dur=0.12, type='sine', vol=0.05){
+  if(!state.soundOn) return;
+  const c = getAudio(); if(!c) return;
+  try{
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    o.connect(g).connect(c.destination);
+    o.start(); o.stop(c.currentTime + dur);
+  }catch(e){}
+}
+const sndOk = () => { beep(523,0.09); setTimeout(()=>beep(659,0.09),70); setTimeout(()=>beep(784,0.14),140); };
+const sndKo = () => { beep(220,0.14,'sawtooth',0.05); setTimeout(()=>beep(165,0.18,'sawtooth',0.05),90); };
+
+// ============ VOIX ============
+let voice = null;
+function loadVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  if(!vs.length){ speechSynthesis.onvoiceschanged = loadVoice; return; }
+  voice = vs.find(v => v.lang==='fr-FR' && v.localService) || vs.find(v => v.lang.startsWith('fr')) || null;
+}
+loadVoice(); setTimeout(loadVoice, 500);
+function say(text){
+  if(!state.voiceOn || !('speechSynthesis' in window)) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='fr-FR'; u.rate=0.9; u.pitch=1.15; if(voice) u.voice=voice; speechSynthesis.speak(u); }catch(e){}
+}
+
+// ============ STATE ============
+const state = {
+  screen:'home', voiceOn:true, soundOn:true,
+  coins:0, streak:0, lastDay:null,
+  stars:{}, shopOwned:{}, shopEquipped:null,
+  tab:'lire', mode:null, level:1,
+  score:0, good:0, earnedCoins:0,
+  lives:3, courseGood:0, nextIdx:0, currentWord:'', coursePattern:[], patternIdx:0,
+  gameState:null, gameLoop:null,
+  orderPool:[], orderInput:[],
+  writeState:null, writeCtx:null
+};
+
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem('kiko_v2') || '{}');
+    state.coins = d.coins || 0;
+    state.streak = d.streak || 0;
+    state.lastDay = d.lastDay || null;
+    state.stars = d.stars || {};
+    state.shopOwned = d.shopOwned || {};
+    state.shopEquipped = d.shopEquipped || null;
+  }catch(e){}
+}
+function save(){
+  try{
+    localStorage.setItem('kiko_v2', JSON.stringify({
+      coins:state.coins, streak:state.streak, lastDay:state.lastDay,
+      stars:state.stars, shopOwned:state.shopOwned, shopEquipped:state.shopEquipped
+    }));
+  }catch(e){}
+}
+function checkStreak(){
+  const today = dayKey();
+  if(state.lastDay === today) return;
+  const yest = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  state.streak = (state.lastDay === yest) ? state.streak + 1 : 1;
+  state.lastDay = today;
+  save();
+}
+load(); checkStreak();
+
+// ============ SHOP ============
+const SHOP = [
+  { id:'hat', name:'Chapeau', emoji:'🎩', desc:'Un chapeau rigolo pour Kiko', price:50, top:'12px', size:'30px' },
+  { id:'glasses', name:'Lunettes', emoji:'🕶', desc:'Le style du champion', price:100, top:'52%', size:'22px' },
+  { id:'crown', name:'Couronne', emoji:'👑', desc:'Le roi du village !', price:200, top:'8px', size:'28px' },
+  { id:'aura', name:'Aura dorée', emoji:'✨', desc:'Kiko brille de mille feux', price:300, top:'-8px', size:'40px' }
+];
+
+// ============ GAMES ============
+const GAME_DEFS = {
+  course: { tab:'lire', emoji:'🎯', name:'La Course', sub:'Attrape les lettres', color:'linear-gradient(145deg,#236d98,#1c3265)', special:'course' },
+  mot: { tab:'lire', emoji:'🧩', name:'Mot Mystère', sub:'Forme un mot', color:'linear-gradient(145deg,#8a6034,#45345f)', special:'course' },
+  ecriture: { tab:'lire', emoji:'✍️', name:'Le Tracé', sub:'Écris les lettres', color:'linear-gradient(145deg,#98466f,#492d71)', special:'write' },
+  compte: { tab:'maths', emoji:'🔢', name:'Compter', sub:'Combien d\'objets ?', color:'linear-gradient(145deg,#22a06b,#0d5f42)',
+    gen: (lvl) => {
+      const emojis = ['🥭','⭐','🍅','🍌','🟠','🐟','🥕','🍎'];
+      const e = pick(emojis);
+      const max = lvl===1?5:lvl===2?8:12;
+      const n = rand(2, max);
+      const visual = e.repeat(n);
+      const wrongs = new Set();
+      while(wrongs.size < 3){ const d = rand(Math.max(1,n-3), n+3); if(d !== n && d > 0) wrongs.add(d); }
+      const options = shuffle([n, ...[...wrongs]]).map(String);
+      return { question: 'Combien y a-t-il ?', visual, options, answer: options.indexOf(String(n)) };
+    }},
+  compare: { tab:'maths', emoji:'⚖️', name:'Comparer', sub:'< = >', color:'linear-gradient(145deg,#7c3aed,#4c1d95)',
+    gen: (lvl) => {
+      const max = lvl===1?10:lvl===2?50:100;
+      let a = rand(1,max), b = rand(1,max);
+      if(lvl===3 && Math.random()<0.3) b = a;
+      const correct = a>b?'<':a<b?'>':'=';
+      const options = ['<','>','='];
+      return { question: 'Choisis le bon signe', visual: `${a}   ?   ${b}`, options, answer: options.indexOf(correct), small:true, three:true };
+    }},
+  addition: { tab:'maths', emoji:'➕', name:'Additions', sub:'Calcule', color:'linear-gradient(145deg,#f97316,#9a3412)',
+    gen: (lvl) => {
+      const max = lvl===1?5:lvl===2?15:50;
+      const a = rand(1,max), b = rand(1,max);
+      const r = a+b;
+      const wrongs = new Set();
+      while(wrongs.size < 3){ const d = rand(-5,5); if(d !== 0 && r+d >= 0) wrongs.add(r+d); }
+      const options = shuffle([r, ...[...wrongs]]).map(String);
+      return { question: `${a} + ${b} = ?`, options, answer: options.indexOf(String(r)) };
+    }},
+  soustraction: { tab:'maths', emoji:'➖', name:'Soustractions', sub:'Calcule', color:'linear-gradient(145deg,#dc2626,#7f1d1d)',
+    gen: (lvl) => {
+      const max = lvl===1?10:lvl===2?20:50;
+      let a = rand(2,max), b = rand(1,a);
+      const r = a-b;
+      const wrongs = new Set();
+      while(wrongs.size < 3){ const d = rand(-5,5); if(d !== 0 && r+d >= 0) wrongs.add(r+d); }
+      const options = shuffle([r, ...[...wrongs]]).map(String);
+      return { question: `${a} − ${b} = ?`, options, answer: options.indexOf(String(r)) };
+    }},
+  formes: { tab:'maths', emoji:'🔷', name:'Formes', sub:'Reconnais-les', color:'linear-gradient(145deg,#0ea5e9,#0c4a6e)',
+    gen: () => {
+      const shapes = [
+        { name:'cercle', emoji:'⚪' }, { name:'carré', emoji:'🟦' },
+        { name:'triangle', emoji:'🔺' }, { name:'étoile', emoji:'⭐' },
+        { name:'losange', emoji:'🔶' }, { name:'cœur', emoji:'💛' }
+      ];
+      const correct = pick(shapes);
+      const pool = shapes.filter(s => s.name !== correct.name);
+      const wrongs = shuffle(pool).slice(0,3).map(s => s.name);
+      const options = shuffle([correct.name, ...wrongs]);
+      return { question:`Quelle est cette forme ?`, visual: correct.emoji, options, answer: options.indexOf(correct.name), small:true };
+    }},
+  suites: { tab:'maths', emoji:'📈', name:'Suites', sub:'Trouve le nombre', color:'linear-gradient(145deg,#0891b2,#155e75)',
+    gen: (lvl) => {
+      const step = lvl===1?rand(1,2):lvl===2?rand(2,4):rand(3,6);
+      const start = lvl===1?1:lvl===2?rand(1,10):rand(5,20);
+      const len = lvl===1?3:4;
+      const seq = [];
+      for(let i=0;i<len;i++) seq.push(start + step*i);
+      const answer = start + step*len;
+      const visual = seq.join(' , ') + ' , ?';
+      const wrongs = new Set();
+      while(wrongs.size < 3){ const d = rand(-4,4); if(d !== 0 && answer+d > 0) wrongs.add(answer+d); }
+      const options = shuffle([answer, ...[...wrongs]]).map(String);
+      return { question: 'Quel nombre vient après ?', visual, options, answer: options.indexOf(String(answer)), small:true };
+    }},
+  monnaie: { tab:'maths', emoji:'💰', name:'Monnaie', sub:'Calcule en F', color:'linear-gradient(145deg,#eab308,#854d0e)',
+    gen: (lvl) => {
+      const p = lvl===1?[25,50,100]:lvl===2?[50,100,200]:[100,200,500];
+      const price = pick(p);
+      const n = lvl===1?rand(2,3):lvl===2?rand(2,4):rand(3,5);
+      const r = price * n;
+      const wrongs = new Set();
+      while(wrongs.size < 3){ const d = (Math.random()<0.5?-50:50) + rand(-1,1)*price; if(r+d > 0 && r+d !== r) wrongs.add(r+d); }
+      const options = shuffle([r, ...[...wrongs]]).map(x => x+' F');
+      return { question: `${n} objets à ${price} F chacun.\nCombien en tout ?`, options, answer: options.indexOf(r+' F'), small:true };
+    }},
+  intrus: { tab:'logique', emoji:'🕵️', name:'Intrus', sub:'Trouve l\'intrus', color:'linear-gradient(145deg,#7c2d12,#431407)',
+    gen: () => {
+      const groups = [
+        { good:['🍎','🍌','🥭','🍊'], bad:'🚗' },
+        { good:['🐘','🦁','🐆','🦓'], bad:'🚲' },
+        { good:['📚','✏️','📓','🖊'], bad:'🐟' },
+        { good:['🥕','🍅','🥔','🧅'], bad:'👟' },
+        { good:['🚗','🚲','🚕','🚌'], bad:'🍌' },
+        { good:['☀️','🌙','⭐','☁️'], bad:'🐢' }
+      ];
+      const g = pick(groups);
+      const goodPicks = shuffle(g.good).slice(0,3);
+      const items = shuffle([...goodPicks, g.bad]);
+      return { question:'Touche l\'intrus', visual: items.join('   '), options: items, answer: items.indexOf(g.bad), small:true, four:true };
+    }},
+  memory: { tab:'logique', emoji:'🃏', name:'Memory', sub:'Retrouve les paires', color:'linear-gradient(145deg,#554ba0,#29336d)', special:'memory' },
+  ordre: { tab:'logique', emoji:'📋', name:'Ranger', sub:'Du petit au grand', color:'linear-gradient(145deg,#65a30d,#365314)', special:'order' },
+  pattern: { tab:'logique', emoji:'🔁', name:'Motifs', sub:'Continue la suite', color:'linear-gradient(145deg,#be185d,#831843)',
+    gen: () => {
+      const patterns = [
+        { seq:['🔴','🔵','🔴','🔵','🔴'], answer:'🔵', opts:['🔵','🔴','🟢','🟡'] },
+        { seq:['⭐','⭐','🌙','⭐','⭐'], answer:'🌙', opts:['🌙','⭐','☀️','✨'] },
+        { seq:['🍎','🍌','🍎','🍌','🍎'], answer:'🍌', opts:['🍌','🍎','🍇','🍊'] },
+        { seq:['⬆️','⬇️','⬆️','⬇️','⬆️'], answer:'⬇️', opts:['⬇️','⬆️','⬅️','➡️'] },
+        { seq:['🟦','🟦','🟨','🟦','🟦'], answer:'🟨', opts:['🟨','🟦','🟥','🟩'] }
+      ];
+      const p = pick(patterns);
+      const opts = shuffle(p.opts);
+      return { question:'Quelle image vient après ?', visual: p.seq.join(' ') + '  ?', options: opts, answer: opts.indexOf(p.answer), small:true, four:true };
+    }}
+};
+
+// ============ NAV ============
+const views = ['home','quiz','memory','order','game','write','shop','result'];
+function show(v){
+  views.forEach(x => $(x).classList.toggle('on', x===v));
+  state.screen = v;
+  if(v==='home') renderHome();
+}
+
+// ============ HOME ============
+function renderHome(){
+  $('coinsChip').textContent = '🪙 ' + state.coins;
+  $('streakChip').textContent = '🔥 ' + state.streak;
+  $('heroGreet').textContent = state.streak > 1 ? `Jours ${state.streak} 🔥` : 'Salut !';
+  $('heroSub').textContent = state.streak > 1 ? 'Ta flamme grandit !' : 'Choisis un jeu';
+  const acc = $('kikoAcc');
+  const equipped = SHOP.find(s => s.id === state.shopEquipped);
+  if(equipped){
+    acc.style.display = 'block';
+    acc.textContent = equipped.emoji;
+    acc.style.top = equipped.top;
+    acc.style.fontSize = equipped.size;
+  } else {
+    acc.style.display = 'none';
+  }
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
+  const games = Object.entries(GAME_DEFS).filter(([_,g]) => g.tab === state.tab);
+  const html = games.map(([id, g]) => {
+    const best = state.stars[id] || 0;
+    const badge = best > 0 ? '⭐'.repeat(Math.min(3,best)) : '';
+    return `<button class="game-card" data-game="${id}" style="background:${g.color}">
+      ${badge ? `<span class="gc-badge">${badge}</span>` : ''}
+      <span class="gc-emoji">${g.emoji}</span>
+      <span class="gc-name">${g.name}</span>
+      <span class="gc-sub">${g.sub}</span>
+    </button>`;
+  }).join('');
+  $('gamesContainer').innerHTML = `<div class="games-grid">${html}</div>`;
+  document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => startGame(b.dataset.game)));
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => { state.tab = t.dataset.tab; beep(600,0.06); renderHome(); });
+});
+
+function startGame(id){
+  const def = GAME_DEFS[id];
+  if(!def) return;
+  state.mode = id;
+  state.score = 0; state.good = 0; state.earnedCoins = 0;
+  const best = state.stars[id] || 0;
+  state.level = best >= 6 ? 3 : best >= 3 ? 2 : 1;
+  if(def.special === 'course') startCourse(def);
+  else if(def.special === 'write') startWrite();
+  else if(def.special === 'memory') startMemory();
+  else if(def.special === 'order') startOrder();
+  else startQuiz(def);
+}
+
+// ============ QUIZ ============
+const quizState = { qIdx:0, total:5, def:null, current:null, locked:false, correct:0, points:0 };
+function startQuiz(def){
+  quizState.qIdx = 0; quizState.def = def; quizState.correct = 0; quizState.points = 0; quizState.locked = false;
+  show('quiz');
+  $('quizTitle').textContent = def.emoji + ' ' + def.name;
+  nextQuestion();
+}
+function nextQuestion(){
+  if(quizState.qIdx >= quizState.total) return endQuiz();
+  quizState.locked = false;
+  const q = quizState.def.gen(state.level);
+  quizState.current = q;
+  $('quizCount').textContent = `Question ${quizState.qIdx+1}/${quizState.total}`;
+  $('quizScore').textContent = `⭐ ${quizState.points}`;
+  $('quizStreakInline').textContent = `🔥 ${state.streak}`;
+  $('quizVisual').textContent = q.visual || '';
+  $('quizVisual').className = 'qVisual' + (q.small ? ' small' : '');
+  $('quizVisual').style.display = q.visual ? 'block' : 'none';
+  $('quizQuestion').textContent = q.question;
+  $('quizQuestion').className = 'qQuestion' + (q.small ? ' small' : '');
+  $('quizFeedback').textContent = '';
+  $('quizFeedback').className = 'qFeedback';
+  $('quizNext').classList.remove('on');
+  const opts = $('quizOptions');
+  opts.innerHTML = '';
+  opts.className = 'qOptions';
+  if(q.three) opts.classList.add('three');
+  else if(q.four) opts.style.gridTemplateColumns = '1fr 1fr';
+  else opts.style.gridTemplateColumns = '1fr 1fr';
+  q.options.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'qOpt' + (q.small || String(opt).length > 8 ? ' small' : '');
+    b.textContent = opt;
+    b.addEventListener('click', () => answerQuiz(i));
+    opts.appendChild(b);
+  });
+  say(q.question.replace(/\n/g, '. '));
+}
+function answerQuiz(idx){
+  if(quizState.locked) return;
+  quizState.locked = true;
+  const q = quizState.current;
+  const all = $('quizOptions').querySelectorAll('.qOpt');
+  all.forEach((b,i) => {
+    b.disabled = true;
+    if(i === q.answer) b.classList.add('good');
+    else if(i === idx) b.classList.add('bad');
+  });
+  if(idx === q.answer){
+    quizState.correct++;
+    quizState.points += 10;
+    const bonus = Math.min(5, state.streak);
+    state.earnedCoins += 2 + bonus;
+    state.good = quizState.correct;
+    state.score = quizState.points;
+    $('quizFeedback').textContent = '✅ Bravo !';
+    $('quizFeedback').className = 'qFeedback good';
+    sndOk();
+    $('quizScore').textContent = `⭐ ${quizState.points}`;
+  } else {
+    $('quizFeedback').textContent = '🤔 Regarde la bonne réponse';
+    $('quizFeedback').className = 'qFeedback bad';
+    sndKo();
+  }
+  $('quizNext').classList.add('on');
+  $('quizNext').textContent = quizState.qIdx === quizState.total-1 ? 'Voir résultat 🏆' : 'Continuer ➜';
+}
+$('quizNext').addEventListener('click', () => {
+  if(!quizState.locked) return;
+  quizState.qIdx++;
+  nextQuestion();
+});
+function endQuiz(){
+  const stars = quizState.correct >= 4 ? 3 : quizState.correct >= 2 ? 2 : 1;
+  const prev = state.stars[state.mode] || 0;
+  state.stars[state.mode] = Math.max(prev, stars);
+  state.coins += state.earnedCoins;
+  save();
+  showResult(quizState.correct >= 3, stars);
+}
+
+// ============ MEMORY ============
+function startMemory(){
+  show('memory');
+  const animals = ['🐘','🦁','🦓','🦒','🐆','🦅'];
+  const cards = shuffle([...animals, ...animals]);
+  let first = null, lock = true, found = 0;
+  $('memGrid').innerHTML = '';
+  $('memFeedback').textContent = 'Mémorise bien…';
+  $('memPairs').textContent = '0/6';
+  cards.forEach((emoji) => {
+    const b = document.createElement('button');
+    b.className = 'memTile open';
+    b.textContent = emoji;
+    b.dataset.emoji = emoji;
+    b.disabled = true;
+    b.addEventListener('click', () => {
+      if(lock || b.classList.contains('match') || b.classList.contains('open')) return;
+      b.classList.add('open');
+      b.textContent = emoji;
+      beep(500, 0.06);
+      if(!first){ first = b; return; }
+      lock = true;
+      const a = first; first = null;
+      if(a.dataset.emoji === emoji){
+        a.classList.add('match'); b.classList.add('match');
+        a.disabled = true; b.disabled = true;
+        found++;
+        $('memPairs').textContent = `${found}/6`;
+        $('memFeedback').textContent = '✅ Paire !';
+        state.earnedCoins += 2;
+        sndOk();
+        lock = false;
+        if(found === 6) setTimeout(() => endMemory(), 500);
+      } else {
+        $('memFeedback').textContent = '🤔 Pas pareil';
+        sndKo();
+        setTimeout(() => {
+          a.classList.remove('open'); a.textContent = '?';
+          b.classList.remove('open'); b.textContent = '?';
+          lock = false;
+        }, 800);
+      }
+    });
+    $('memGrid').appendChild(b);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.memTile').forEach(b => {
+      if(!b.classList.contains('match')){
+        b.classList.remove('open');
+        b.textContent = '?';
+        b.disabled = false;
+      }
+    });
+    lock = false;
+    $('memFeedback').textContent = 'Retrouve les 6 paires !';
+  }, 1800);
+}
+function endMemory(){
+  state.stars.memory = Math.max(state.stars.memory || 0, 3);
+  state.coins += state.earnedCoins + 5;
+  state.score = 6;
+  state.good = 6;
+  save();
+  showResult(true, 3);
+}
+
+// ============ ORDER ============
+function startOrder(){
+  show('order');
+  const lvl = state.level;
+  const count = lvl===1?3:4;
+  const pool = [];
+  while(pool.length < count){
+    const n = rand(1, count === 3 ? 20 : 60);
+    if(!pool.includes(n)) pool.push(n);
+  }
+  state.orderPool = [...pool].sort((a,b)=>a-b);
+  state.orderInput = [];
+  $('orderScore').textContent = '0';
+  $('orderHint').textContent = 'Touche du plus petit au plus grand';
+  const items = $('orderItems');
+  items.innerHTML = '';
+  shuffle(pool).forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'orderItem';
+    b.dataset.n = n;
+    b.innerHTML = `<span class="num">•</span><span>${n}</span>`;
+    b.addEventListener('click', () => tapOrder(b));
+    items.appendChild(b);
+  });
+  $('orderValidate').classList.remove('on');
+}
+function tapOrder(b){
+  const n = parseInt(b.dataset.n);
+  if(b.classList.contains('selected')) return;
+  b.classList.add('selected');
+  state.orderInput.push(n);
+  b.querySelector('.num').textContent = state.orderInput.length;
+  beep(500, 0.05);
+  if(state.orderInput.length === state.orderPool.length) $('orderValidate').classList.add('on');
+}
+$('orderValidate').addEventListener('click', () => {
+  const correct = state.orderPool;
+  const ok = state.orderInput.every((v,i) => v === correct[i]);
+  if(ok){
+    state.stars.ordre = Math.max(state.stars.ordre || 0, 3);
+    state.coins += 10;
+    state.score = 10;
+    state.good = state.orderPool.length;
+    save();
+    sndOk();
+    showResult(true, 3);
+  } else {
+    sndKo();
+    toast('Pas tout à fait. Essaie encore !');
+    state.orderInput = [];
+    $('orderValidate').classList.remove('on');
+    document.querySelectorAll('.orderItem').forEach(x => {
+      x.classList.remove('selected');
+      x.querySelector('.num').textContent = '•';
+    });
+  }
+});
+
+// ============ COURSE ============
+const canvas = $('gameCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){
+  const wrap = $('gameWrap');
+  const w = wrap.clientWidth;
+  const h = Math.min(280, Math.max(220, w*0.58));
+  canvas.width = w * window.devicePixelRatio;
+  canvas.height = h * window.devicePixelRatio;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+  if(state.gameState){ state.gameState.w = w; state.gameState.h = h; }
+}
+window.addEventListener('resize', resizeCanvas);
+
+function startCourse(def){
+  show('game');
+  resizeCanvas();
+  const lv = state.level;
+  const word = def === GAME_DEFS.mot ? pick(['CHAT','MAMA','PAPA','RIZ','LION','EAU']) : null;
+  state.currentWord = word || '';
+  state.lives = 3; state.courseGood = 0; state.nextIdx = 0; state.score = 0;
+  $('gameTitle').textContent = def.emoji + ' ' + def.name;
+  $('gameLives').textContent = '❤️❤️❤️';
+  $('gameScore').textContent = '⭐ 0';
+  $('consigneText').textContent = word ? 'Forme le mot :' : (lv===1 ? 'Attrape les voyelles' : 'Attrape les bonnes lettres');
+  $('consigneWord').textContent = word ? word.split('').join(' ') : '';
+
+  const letters = word ? word.split('') : lv===1 ? ['A','E','I','O','U'] : lv===2 ? ['M','P','T','S','L'] : ['MA','ME','MI','MO','MU'];
+  const badLetters = word ? ['B','C','D','F','G','H'] : lv===1 ? ['M','P','T','S','L'] : lv===2 ? ['A','E','I','O','U'] : ['PA','TE','SI','LO','PO'];
+
+  const pattern = [];
+  if(word){
+    for(let i=0;i<word.length;i++) pattern.push({ type:'good', letter:word[i], order:i });
+    for(let i=0;i<word.length+2;i++) pattern.push({ type:'bad', letter:pick(badLetters) });
+    const gs = pattern.filter(x => x.type==='good');
+    const bs = pattern.filter(x => x.type==='bad');
+    const mixed = [];
+    let gi = 0;
+    for(let i=0;i<gs.length+bs.length;i++){
+      if(i % 2 === 1 && gi < gs.length) mixed.push(gs[gi++]);
+      else if(bs.length) mixed.push(bs.shift());
+      else if(gi < gs.length) mixed.push(gs[gi++]);
+    }
+    state.coursePattern = mixed;
+  } else {
+    const total = 6;
+    const pat = [];
+    for(let i=0;i<total;i++) pat.push({ type:'good', letter:pick(letters) });
+    for(let i=0;i<total;i++) pat.push({ type:'bad', letter:pick(badLetters) });
+    state.coursePattern = shuffle(pat);
+  }
+  state.patternIdx = 0;
+
+  const w = canvas.clientWidth || 300;
+  const h = canvas.clientHeight || 220;
+  state.gameState = {
+    w, h, railY:[h*0.42, h*0.78], currentRail:1, kikoX:w*0.22, speed:220,
+    items:[], spawnTimer:0, spawnInterval:1.3, time:0, finished:false
+  };
+  if(state.gameLoop) cancelAnimationFrame(state.gameLoop);
+  let lastT = performance.now();
+  function tick(t){
+    const dt = Math.min(0.05, (t-lastT)/1000);
+    lastT = t;
+    updateCourse(dt);
+    drawCourse();
+    if(state.gameState && !state.gameState.finished) state.gameLoop = requestAnimationFrame(tick);
+  }
+  state.gameLoop = requestAnimationFrame(tick);
+}
+
+function updateCourse(dt){
+  const g = state.gameState; if(!g || g.finished) return;
+  g.time += dt;
+  g.spawnTimer += dt;
+  if(g.spawnTimer >= g.spawnInterval){
+    g.spawnTimer = 0;
+    if(state.patternIdx < state.coursePattern.length){
+      const p = state.coursePattern[state.patternIdx++];
+      const rail = Math.random() < 0.5 ? 0 : 1;
+      g.items.push({ x: g.w+40, y: g.railY[rail], rail, type:p.type, letter:p.letter, order:p.order, collected:false });
+    }
+  }
+  for(let i=g.items.length-1;i>=0;i--){
+    const it = g.items[i];
+    it.x -= g.speed * dt;
+    if(!it.collected && Math.abs(it.x - g.kikoX) < 30 && it.rail === g.currentRail){
+      it.collected = true;
+      handleCollect(it);
+    }
+    if(it.x < -60) g.items.splice(i,1);
+  }
+  if(state.patternIdx >= state.coursePattern.length && g.items.length === 0 && !g.finished){
+    endCourse(true);
+  }
+}
+
+function handleCollect(it){
+  if(it.type === 'good'){
+    if(state.currentWord){
+      const expected = state.currentWord[state.nextIdx];
+      if(it.letter === expected){
+        state.nextIdx++;
+        state.courseGood++;
+        state.score += 10;
+        state.good = state.courseGood;
+        $('gameScore').textContent = '⭐ ' + state.score;
+        sndOk();
+        const w = state.currentWord;
+        const done = w.slice(0,state.nextIdx);
+        const asked = w[state.nextIdx] || '';
+        const rest = w.slice(state.nextIdx+1);
+        $('consigneWord').innerHTML = `<span class="done">${done}</span>${asked?`<span class="asked">${asked}</span>`:''}${rest}`;
+        if(state.nextIdx >= w.length) setTimeout(()=>endCourse(true), 400);
+      } else {
+        state.score = Math.max(0, state.score - 3);
+        $('gameScore').textContent = '⭐ ' + state.score;
+        beep(300,0.08);
+      }
+    } else {
+      state.courseGood++;
+      state.score += 10;
+      state.good = state.courseGood;
+      $('gameScore').textContent = '⭐ ' + state.score;
+      sndOk();
+    }
+  } else {
+    state.lives--;
+    $('gameLives').textContent = '❤️'.repeat(Math.max(0,state.lives));
+    sndKo();
+    if(state.lives <= 0) endCourse(false);
+  }
+}
+
+function drawCourse(){
+  const g = state.gameState; if(!g) return;
+  const w = g.w, h = g.h;
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'#4a7bd1'); grad.addColorStop(0.55,'#7db2e8'); grad.addColorStop(1,'#a8dda8');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = '#ffe77b'; ctx.beginPath(); ctx.arc(w-45,38,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#8a593a'; ctx.fillRect(0,h*0.62,w,h*0.38);
+  ctx.fillStyle = '#4b994c'; ctx.fillRect(0,h*0.62,w,6);
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.setLineDash([6,6]); ctx.lineWidth = 1.5;
+  g.railY.forEach(y => { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); });
+  ctx.setLineDash([]);
+  for(const it of g.items){
+    if(it.collected) continue;
+    const size = 40;
+    const x = it.x - size/2, y = it.y - size/2;
+    ctx.fillStyle = it.type==='good' ? '#ffd84d' : '#ff72ad';
+    ctx.strokeStyle = it.type==='good' ? '#b8860b' : '#a0285c';
+    const r = 10;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+size,y,x+size,y+size,r); ctx.arcTo(x+size,y+size,x,y+size,r);
+    ctx.arcTo(x,y+size,x,y,r); ctx.arcTo(x,y,x+size,y,r); ctx.closePath();
+    ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#0a1230'; ctx.font = 'bold 20px system-ui, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(it.letter, it.x, it.y+1);
+  }
+  const kx = g.kikoX, ky = g.railY[g.currentRail] + Math.sin(g.time*8)*2;
+  ctx.save(); ctx.translate(kx, ky);
+  ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(0,18,16,4,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ffd12f'; ctx.beginPath(); ctx.ellipse(0,0,13,17,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#174f9c'; ctx.fillRect(-11,8,22,8);
+  ctx.fillStyle = '#8b4b2e'; ctx.beginPath(); ctx.arc(0,-14,12,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#171321'; ctx.beginPath(); ctx.arc(0,-20,10,Math.PI,0); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-4,-13,2.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(4,-13,2.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#171321'; ctx.beginPath(); ctx.arc(-3,-13,1.3,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(5,-13,1.3,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+document.querySelectorAll('[data-rail]').forEach(b => {
+  b.addEventListener('click', () => { if(state.gameState){ state.gameState.currentRail = parseInt(b.dataset.rail); beep(500,0.04); } });
+});
+canvas.addEventListener('click', (e) => {
+  if(!state.gameState) return;
+  const rect = canvas.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  state.gameState.currentRail = y < rect.height/2 ? 0 : 1;
+  beep(500,0.04);
+});
+let ts = null;
+canvas.addEventListener('touchstart', e => { ts = {y:e.touches[0].clientY}; }, {passive:true});
+canvas.addEventListener('touchend', e => {
+  if(!ts || !state.gameState) return;
+  const dy = e.changedTouches[0].clientY - ts.y;
+  if(Math.abs(dy) > 20) state.gameState.currentRail = dy<0 ? 0 : 1;
+  ts = null;
+}, {passive:true});
+window.addEventListener('keydown', e => {
+  if(!state.gameState || state.screen!=='game') return;
+  if(e.key==='ArrowUp'){ state.gameState.currentRail = 0; e.preventDefault(); }
+  if(e.key==='ArrowDown'){ state.gameState.currentRail = 1; e.preventDefault(); }
+});
+
+function endCourse(win){
+  const g = state.gameState; if(!g || g.finished) return;
+  g.finished = true;
+  if(state.gameLoop) cancelAnimationFrame(state.gameLoop);
+  const stars = win ? (state.lives>=3?3:state.lives>=2?2:1) : 0;
+  const prev = state.stars[state.mode] || 0;
+  state.stars[state.mode] = Math.max(prev, stars);
+  state.coins += win ? 8 : 3;
+  save();
+  setTimeout(() => showResult(win, stars), 400);
+}
+
+// ============ WRITE ============
+function startWrite(){
+  show('write');
+  const wc = $('writeCanvas');
+  const parent = $('writeWrap');
+  const w = parent.clientWidth - 16;
+  const h = Math.min(320, w);
+  wc.width = w * window.devicePixelRatio;
+  wc.height = h * window.devicePixelRatio;
+  wc.style.width = w + 'px';
+  wc.style.height = h + 'px';
+  state.writeCtx = wc.getContext('2d');
+  state.writeCtx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+  const letter = pick(['A','E','I','O','U','M','P','T','S','L']);
+  state.writeState = { w, h, letter, drawing:false, points:[] };
+  $('writeTitle').textContent = '✍️ Écris : ' + letter;
+  say(`Écris la lettre ${letter}`);
+  drawWriteBg();
+}
+function drawWriteBg(){
+  const ws = state.writeState; if(!ws) return;
+  const { w, h, letter } = ws;
+  const c = state.writeCtx;
+  c.fillStyle = '#fff'; c.fillRect(0,0,w,h);
+  c.strokeStyle = '#e5e7eb'; c.lineWidth = 1;
+  for(let y=40; y<h; y+=40){ c.beginPath(); c.moveTo(0,y); c.lineTo(w,y); c.stroke(); }
+  c.fillStyle = '#e5e7eb';
+  c.font = `bold ${h*0.75}px system-ui, sans-serif`;
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(letter, w/2, h/2);
+  ws.points = [];
+}
+function drawWritePoint(e){
+  const ws = state.writeState;
+  if(!ws || !ws.drawing) return;
+  const c = state.writeCtx;
+  const rect = $('writeCanvas').getBoundingClientRect();
+  const p = e.touches ? e.touches[0] : e;
+  const x = p.clientX - rect.left;
+  const y = p.clientY - rect.top;
+  ws.points.push([x,y]);
+  c.fillStyle = '#0a1230';
+  c.beginPath(); c.arc(x,y,6,0,Math.PI*2); c.fill();
+}
+(function initWriteEvents(){
+  const c = $('writeCanvas');
+  c.addEventListener('mousedown', e => { if(state.writeState){ state.writeState.drawing = true; drawWritePoint(e); } e.preventDefault(); });
+  c.addEventListener('mousemove', e => { drawWritePoint(e); });
+  c.addEventListener('mouseup', () => { if(state.writeState) state.writeState.drawing = false; });
+  c.addEventListener('mouseleave', () => { if(state.writeState) state.writeState.drawing = false; });
+  c.addEventListener('touchstart', e => { if(state.writeState){ state.writeState.drawing = true; drawWritePoint(e); } e.preventDefault(); }, {passive:false});
+  c.addEventListener('touchmove', e => { drawWritePoint(e); e.preventDefault(); }, {passive:false});
+  c.addEventListener('touchend', () => { if(state.writeState) state.writeState.drawing = false; });
+})();
+document.querySelector('[data-clear]').addEventListener('click', () => { drawWriteBg(); toast('Effacé'); });
+document.querySelector('[data-validate]').addEventListener('click', () => {
+  const ws = state.writeState;
+  if(!ws || ws.points.length < 10){ toast('Trace plus longtemps !'); return; }
+  const { w, h, letter, points } = ws;
+  const maps = {
+    'A':[[0.5,0.25],[0.35,0.75],[0.65,0.75],[0.4,0.55],[0.6,0.55]],
+    'E':[[0.4,0.25],[0.4,0.5],[0.4,0.75],[0.65,0.25],[0.65,0.75]],
+    'I':[[0.5,0.25],[0.5,0.5],[0.5,0.75]],
+    'O':[[0.5,0.25],[0.35,0.5],[0.65,0.5],[0.5,0.75]],
+    'U':[[0.35,0.25],[0.35,0.6],[0.5,0.75],[0.65,0.25]],
+    'M':[[0.3,0.75],[0.3,0.25],[0.5,0.5],[0.7,0.25],[0.7,0.75]],
+    'P':[[0.4,0.25],[0.4,0.75],[0.6,0.3],[0.6,0.45]],
+    'T':[[0.3,0.25],[0.5,0.25],[0.7,0.25],[0.5,0.75]],
+    'S':[[0.65,0.3],[0.5,0.25],[0.35,0.4],[0.5,0.5],[0.65,0.6],[0.5,0.75],[0.35,0.7]],
+    'L':[[0.4,0.25],[0.4,0.75],[0.65,0.75]]
+  };
+  const keyPts = (maps[letter] || [[0.5,0.5]]).map(p => [p[0]*w, p[1]*h]);
+  let covered = 0;
+  for(const kp of keyPts){
+    if(Math.min(...points.map(p => Math.hypot(p[0]-kp[0], p[1]-kp[1]))) < 60) covered++;
+  }
+  if(covered / keyPts.length >= 0.55){
+    state.stars.ecriture = Math.max(state.stars.ecriture || 0, 3);
+    state.coins += 5;
+    save();
+    sndOk();
+    say('Bravo !');
+    setTimeout(() => startWrite(), 1300);
+  } else {
+    sndKo(); say('Essaie encore');
+    toast('Suis bien le modèle gris');
+  }
+});
+
+// ============ SHOP ============
+function showShop(){
+  show('shop');
+  $('shopCoins').textContent = state.coins;
+  const html = SHOP.map(item => {
+    const owned = !!state.shopOwned[item.id];
+    const equipped = state.shopEquipped === item.id;
+    let btnHtml;
+    if(equipped) btnHtml = `<button class="item-btn equipped" data-item="${item.id}">Porté ✓</button>`;
+    else if(owned) btnHtml = `<button class="item-btn owned" data-item="${item.id}">Porter</button>`;
+    else btnHtml = `<button class="item-btn" data-item="${item.id}" ${state.coins < item.price ? 'disabled' : ''}>${item.price} 🪙</button>`;
+    return `<div class="shop-card">
+      <div class="item-icon">${item.emoji}</div>
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+      </div>
+      ${btnHtml}
+    </div>`;
+  }).join('');
+  $('shopItems').innerHTML = html;
+  document.querySelectorAll('[data-item]').forEach(b => {
+    b.addEventListener('click', () => {
+      const item = SHOP.find(s => s.id === b.dataset.item);
+      if(!item) return;
+      if(state.shopOwned[item.id]){
+        state.shopEquipped = (state.shopEquipped === item.id) ? null : item.id;
+        save(); beep(600,0.06);
+        showShop();
+      } else if(state.coins >= item.price){
+        state.coins -= item.price;
+        state.shopOwned[item.id] = true;
+        state.shopEquipped = item.id;
+        save(); sndOk(); confetti();
+        toast('Acheté ! ' + item.emoji);
+        showShop();
+      } else {
+        toast('Pas assez de pièces');
+      }
+    });
+  });
+}
+
+// ============ RESULT ============
+function showResult(win, stars){
+  show('result');
+  $('resultEmoji').textContent = win ? (stars>=3?'🏆':'🥳') : '💪';
+  $('resultTitle').textContent = win ? (stars>=3?'Parfait !':'Bravo !') : 'Continue !';
+  $('resultText').textContent = win ? 'Tu progresses vite !' : 'Chaque essai te rend plus fort.';
+  $('resPoints').textContent = state.score || 0;
+  $('resGood').textContent = state.good || 0;
+  $('resCoins').textContent = state.earnedCoins || 0;
+  if(win && stars>=2){ say('Bravo !'); confetti(); }
+  else if(!win) say('Essaie encore !');
+}
+function confetti(){
+  for(let i=0; i<50; i++){
+    const c = document.createElement('i');
+    c.className = 'conf';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = ['#ffd84d','#5ce9ed','#ff72ad','#75e7a7','#fff'][i%5];
+    c.style.animationDelay = Math.random()*0.6 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2300);
+  }
+}
+$('replayBtn').addEventListener('click', () => { if(state.mode) startGame(state.mode); });
+
+// ============ BACK / ACTIONS ============
+document.querySelectorAll('[data-back]').forEach(b => {
+  b.addEventListener('click', () => {
+    if(state.gameLoop) cancelAnimationFrame(state.gameLoop);
+    state.gameState = null;
+    show('home');
+  });
+});
+document.querySelector('[data-action="surprise"]').addEventListener('click', () => {
+  const all = Object.keys(GAME_DEFS);
+  startGame(pick(all));
+});
+document.querySelector('[data-action="shop"]').addEventListener('click', showShop);
+
+// ============ TOAST ============
+let toastTimer = null;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ============ SERVICE WORKER (PWA) ============
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
+  });
+}
+
+// ============ INIT ============
+renderHome();
+resizeCanvas();
+})();
+</script>
+</body>
+  </html>
